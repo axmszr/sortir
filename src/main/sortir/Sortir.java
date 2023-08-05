@@ -1,69 +1,65 @@
 package sortir;
 
-import java.util.Scanner;
+import java.util.List;
 
-import sortir.io.Writer;
+import sortir.exc.HowEvenException;
+import sortir.exc.RageQuitException;
+import sortir.io.Literate;
+import sortir.rank.Merger;
+import sortir.rank.Ranker;
 
 class Sortir {
 
-    public static void main(String[] args) throws InterruptedException {
-        Scanner sc = new Scanner(System.in);
+    public static void main(String[] args) throws InterruptedException, HowEvenException {
+        Literate rw = new Literate();
 
-        int choice = getActionChoice(sc);
-
-        if (choice == 1) {
-            // rank
-
-            // read in 1 list, and mention errors if any
-            // go to other function
-        } else if (choice == 2) {
-            // merge
-
-            // read in multiple lists, and mention errors if any
-            // go to other function
-        } else {
-            ragequit();
-        }
-
-
-    }
-
-    private static int getActionChoice(Scanner sc) throws InterruptedException {
-        for (int i = 0; i < 4; i++) {
-            System.out.println(Writer.sayActionChoices(i));
-            String input = sc.nextLine().trim();
-
-            if (input.equals("1")) {
-                return 1;
-            } else if (input.equals("2")) {
-                return 2;
+        try {
+            int choice = rw.getActionChoice();
+            switch (choice) {
+            case 1:     // rank
+                Ranker ranker = makeRanker(rw);
+                // read in 1 list, mentioning errors along the way
+                break;
+            case 2:     // merge
+                Merger merger = makeMerger(rw);
+                // ask for number of lists
+                // read in that many lists
+                break;
+            default:    // panik
+                throw new HowEvenException();
             }
+        } catch (RageQuitException e) {
+            rageQuit();
         }
 
-        ragequit();
-        return 0;   // to sate intellij
+
     }
 
-    private static int getInputChoice(Scanner sc) throws InterruptedException {
-        for (int i = 0; i < 4; i++) {
-            System.out.println(Writer.sayInputChoices(i));
-            String input = sc.nextLine().trim();
-
-            if (input.equals("1")) {
-                // do input
-                return 1;
-            } else if (input.equals("2")) {
-                // do input
-                return 2;
-            }
-        }
-
-        ragequit();
-        return 0;   // to sate intellij
+    private static Ranker makeRanker(Literate rw) {
+        // ask for input type
+        // if manual, how many inputs
+        // if file, read in
     }
 
-    private static void ragequit() throws InterruptedException {
-        System.out.println(Writer.sayRagequit());
+    private static Merger makeMerger(Literate rw) {
+        // ask for how many lists
+        // for each, ask for input type
+        // if manual input, convert to proper form (add #ranked)
+    }
+
+    private static List<String> manualInput() {
+        // ask for how many inputs
+        // provide format
+
+    }
+
+    private static List<String> readFile() {
+        // ask for file name, must be in same directory
+
+    }
+
+    private static void rageQuit() throws InterruptedException {
+        Writer.sayRageQuit();
         Thread.sleep(2000);
         System.exit(0);
     }
