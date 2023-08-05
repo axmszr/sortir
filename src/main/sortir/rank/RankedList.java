@@ -3,8 +3,12 @@ package sortir.rank;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
+
+import sortir.exc.BadFileException;
+import sortir.exc.HowEvenException;
+import sortir.exc.RageQuitException;
+import sortir.io.Literate;
 
 public class RankedList {
     private static final String HEADER = "#ranked";
@@ -19,22 +23,25 @@ public class RankedList {
         return this.head.makeFullCopy();
     }
     
-    // temp
-    private int vs(Rankee first, Rankee second, Scanner sc) {
-        System.out.printf("%s vs %s%n",
-                first, second);
-        String input = sc.nextLine().trim();
-        
-        if (input.equals("1")) {
+    private static int inputToVs(int input) throws HowEvenException {
+        switch (input) {
+        case 1:     // first wins
             return 1;
-        } else if (input.equals("-1")) {
+        case 2:     // second wins
             return -1;
-        } else {
+        case 3:     // tie
             return 0;
+        default:    // bad input
+            throw new HowEvenException();
         }
     }
+
+    private static int vs(Rankee first, Rankee second, Literate rw) throws RageQuitException, HowEvenException {
+        int input = rw.getRankChoice(first.getName(), second.getName());
+        return inputToVs(input);
+    }
     
-    public RankedList merge(RankedList other, Scanner sc) {
+    public RankedList merge(RankedList other, Literate rw) throws RageQuitException, HowEvenException {
         Rankee highPointer; // prev highest pointer
         Rankee nextPointer;  // below high
         Rankee otherPointer;  // other branch
@@ -42,21 +49,23 @@ public class RankedList {
         Rankee thisHead = getHead();
         Rankee otherHead = other.getHead();
         
-        int result = vs(thisHead, otherHead, sc);
-        if (result == 1) {          // this.head wins
+        int result = vs(thisHead, otherHead, rw);
+        switch (result) {
+        case 1:     // thisHead wins
             highPointer = thisHead;
             otherPointer = otherHead;
-        } else if (result == -1) {  // other.head wins
+            break;
+        case -1:    // otherHead wins
             highPointer = otherHead;
             otherPointer = thisHead;
-        } else if (result == 0) {   // tie
+            break;
+        case 0:     // tie
             highPointer = thisHead;
             thisHead.makeTie(otherHead);
             otherPointer = otherHead.getBelow();
-        } else {
-            // panik
-            highPointer = thisHead;
-            otherPointer = otherHead;
+            break;
+        default:    // panik
+            throw new HowEvenException();
         }
         
         RankedList newList = new RankedList(highPointer);
@@ -67,20 +76,24 @@ public class RankedList {
         
         while (!highPointer.isTail()) {
             nextPointer = highPointer.getBelow();
-            result = vs(nextPointer, otherPointer, sc);
-            if (result == 1) {          // nextPointer wins
+            result = vs(nextPointer, otherPointer, rw);
+            switch (result) {
+            case 1:     // nextPointer wins
                 highPointer.setBelow(nextPointer);
                 highPointer = nextPointer;
-            } else if (result == -1) {  // otherPointer wins
+                break;
+            case -1:    // otherPointer wins
                 highPointer.setBelow(otherPointer);
                 highPointer = otherPointer;
                 otherPointer = nextPointer;
-            } else if (result == 0) {   // tie
+                break;
+            case 0:     // tie
                 nextPointer.makeTie(otherPointer);
                 highPointer = nextPointer;
                 otherPointer = otherPointer.getBelow();
-            } else {
-                // panik
+                break;
+            default:    // panik
+                throw new HowEvenException();
             }
         }
         
@@ -123,13 +136,13 @@ public class RankedList {
         return HEADER + "\n" + toString();
     }
     
-    public RankedList fromTxtFormat(String fullContent) {
+    public RankedList fromTxtFormat(String fullContent) throws BadFileException {
         String[] fullArray = fullContent.split("\n");
         
         if (!fullArray[0].equals(HEADER)) {
-            // throw error, wrong format
+            throw new BadFileException("Wrong file header.");
         } else if (fullArray.length < 2) {
-            // throw error, no elements
+            throw new BadFileException("File has no Rankees.");
         }
         
         String[] noHeader = Arrays.copyOfRange(fullArray, 2, fullArray.length);
@@ -138,7 +151,7 @@ public class RankedList {
         for (String line : noHeader) {
             String[] parts = line.split(Rankee.DELIMITER);
             if (parts.length != 2) {
-                // throw error, wrong format
+                throw new BadFileException("Incorrect format in line: " + line);
             }
 
             try {
@@ -148,14 +161,14 @@ public class RankedList {
 
                 rankees.add(rankee);
             } catch (NumberFormatException e) {
-                // throw error, wrong format
+                throw new BadFileException("Invalid rank in line: " + line);
             }
         }
         
         Rankee pointer = rankees.get(0);
         
         if (pointer.getRank() != 1) {
-            // throw error, wrong numbering
+            throw new BadFileException("First Rankee should be Rank 1.");
         }
         
         RankedList rankedList = new RankedList(pointer);
@@ -166,12 +179,12 @@ public class RankedList {
             int rank = rankee.getRank();
             
             if (rank < prev) {
-                // throw error, wrong numbering
+                throw new BadFileException("Improper rank order in line: " + noHeader[i]);
             } else if (rank == prev) {
                 pointer.makeTie(rankee);
             } else {    // i.e. rank > prev
                 if (rank != i + 1) {
-                    // throw error, wrong numbering
+                    throw new BadFileException("Incorrect rank in line: " + noHeader[i]);
                 }
                 
                 pointer.setBelow(rankee);

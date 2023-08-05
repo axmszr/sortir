@@ -4,8 +4,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Scanner;
 import java.util.stream.Collectors;
+
+import sortir.exc.HowEvenException;
+import sortir.exc.RageQuitException;
+import sortir.io.Literate;
 
 public class Merger {
     private final List<RankedList> original;
@@ -21,7 +24,7 @@ public class Merger {
     
     private static List<RankedList> copyLists(List<RankedList> rankedLists) {
         return rankedLists.stream()
-                .map(rankedList -> rankedList.makeCopy())
+                .map(RankedList::makeCopy)
                 .collect(Collectors.toList());
     }
     
@@ -29,12 +32,12 @@ public class Merger {
         return (queue.size() <= 1);
     }
     
-    public RankedList merge(Scanner sc) {
+    public RankedList merge(Literate rw) throws RageQuitException, HowEvenException {
         while (!isMerged()) {
             RankedList first = queue.poll();
             RankedList second = queue.poll();
             
-            RankedList merged = first.merge(second, sc);
+            RankedList merged = first.merge(second, rw);
             queue.offer(merged);
         }
         
