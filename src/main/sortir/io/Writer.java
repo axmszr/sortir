@@ -7,12 +7,15 @@ public class Writer {
     private static final String ANGRY_FACE = "(-_-)";
     private static final String GAP = "     ";
     private static final List<String> noBody = List.of();
+    private static final String RAGE_QUIT = "...";
+    private static final String OI = "oi one more time ah";
+    private static final String TIE = "[3] ~-TIE-~";
     
     private static final List<String> ACTION_QUERY_HEADERS = List.of(
             "Hello! How can I help you today?",
             "Type '1' or '2' to select!",
             "Just type '1' or '2'.",
-            "oi one more time ah");
+            OI);
     
     private static final List<String> ACTION_QUERY_BODY = List.of(
             "[1] Rank a list",
@@ -22,14 +25,18 @@ public class Writer {
             "Sure! How would you like to read that in?",
             "Type '1' or '2' to select!",
             "Just type '1' or '2'.",
-            "oi one more time ah");
+            OI);
     
     private static final List<String> INPUT_QUERY_BODY = List.of(
             "[1] Manual input",
             "[2] Read from file");
-    
-    private static final String RAGEQUIT = "...";
-    
+
+    private static final List<String> RANK_QUERY_HEADERS = List.of(
+            "Make your pick!",
+            "Type '1' or '2' to select, or '3' to call a tie!",
+            "Just type '1', '2' or '3'.",
+            OI);
+
     private static String repeat(String str, int times) {
         StringBuilder sb = new StringBuilder();
 
@@ -39,8 +46,12 @@ public class Writer {
         
         return sb.toString();
     }
+
+    private static void print(String str) {
+        System.out.println(str);
+    }
     
-    private static String say(String face, String header, List<String> body) {
+    private static void say(String face, String header, List<String> body) {
         int len = header.length() + 2;  // includes "~ ", but not the buffer before/after
         
         for (String line : body) {
@@ -75,44 +86,54 @@ public class Writer {
                 GAP + "|/\n" +
                 face;
 
-        return top + headerLine + bodyLines + bottom;
+        print(top + headerLine + bodyLines + bottom);
     }
     
-    public static String sayHappy(String header, List<String> body) {
-        return say(HAPPY_FACE, header, body);
+    public static void sayHappy(String header, List<String> body) {
+        say(HAPPY_FACE, header, body);
     }
     
-    public static String sayHappy(String header) {
-        return say(HAPPY_FACE, header, noBody);
+    public static void sayHappy(String header) {
+        say(HAPPY_FACE, header, noBody);
     }
     
-    public static String sayAngry(String header, List<String> body) {
-        return say(ANGRY_FACE, header, body);
+    public static void sayAngry(String header, List<String> body) {
+        say(ANGRY_FACE, header, body);
     }
     
-    public static String sayAngry(String header) {
-        return say(ANGRY_FACE, header, noBody);
+    public static void sayAngry(String header) {
+        say(ANGRY_FACE, header, noBody);
     }
     
-    private static String sayHappyIndex(List<String> headerList, int i, List<String> body) {
+    private static void sayHappyIndex(List<String> headerList, int i, List<String> body) {
         try {
-            return sayHappy(headerList.get(i), body);
+            sayHappy(headerList.get(i), body);
         }
         catch (IndexOutOfBoundsException e) {
-            return sayHappy(headerList.get(headerList.size() - 1), body);
+            sayHappy(headerList.get(headerList.size() - 1), body);
         }
     }
     
-    public static String sayActionChoices(int i) {
-        return sayHappyIndex(ACTION_QUERY_HEADERS, i, ACTION_QUERY_BODY);
+    public static void sayActionChoices(int i) {
+        sayHappyIndex(ACTION_QUERY_HEADERS, i, ACTION_QUERY_BODY);
     }
     
-    public static String sayInputChoices(int i) {
-        return sayHappyIndex(INPUT_QUERY_HEADERS, i, INPUT_QUERY_BODY);
+    public static void sayInputChoices(int i) {
+        sayHappyIndex(INPUT_QUERY_HEADERS, i, INPUT_QUERY_BODY);
     }
     
-    public static String sayRagequit() {
-        return sayAngry(RAGEQUIT);
+    public static void sayRageQuit() {
+        sayAngry(RAGE_QUIT);
     }
 
+    private static List<String> makeRankBody(String firstName, String secondName) {
+        String firstBody = "[1] " + firstName;
+        String secondBody = "[2] " + secondName;
+        return List.of(firstBody, secondBody, TIE);
+    }
+
+    public static void sayRankChoices(String firstName, String secondName, int i) {
+        List<String> rankBody = makeRankBody(firstName, secondName);
+        sayHappyIndex(RANK_QUERY_HEADERS, i, rankBody);
+    }
 }

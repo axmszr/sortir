@@ -4,8 +4,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Scanner;
 import java.util.stream.Collectors;
+
+import sortir.exc.HowEvenException;
+import sortir.exc.RageQuitException;
+import sortir.io.Literate;
 
 public class Ranker {
     private final List<String> names;
@@ -30,12 +33,12 @@ public class Ranker {
         return (queue.size() <= 1);
     }
     
-    public RankedList rank(Scanner sc) {
+    public RankedList rank(Literate rw) throws RageQuitException, HowEvenException {
         while (!isRanked()) {
             RankedList first = queue.poll();
             RankedList second = queue.poll();
             
-            RankedList merged = first.merge(second, sc);
+            RankedList merged = first.merge(second, rw);
             queue.offer(merged);
         }
         
