@@ -5,6 +5,7 @@ import java.util.List;
 import sortir.exc.HowEvenException;
 import sortir.exc.RageQuitException;
 import sortir.io.Literate;
+import sortir.io.Writer;
 import sortir.rank.Merger;
 import sortir.rank.Ranker;
 
