@@ -1,7 +1,6 @@
 package sortir.rank;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,7 +10,7 @@ import sortir.exc.RageQuitException;
 import sortir.io.Literate;
 
 public class RankedList {
-    private static final String HEADER = "#ranked";
+    public static final String HEADER = "#ranked";
     
     private final Rankee head;
     
@@ -136,17 +135,15 @@ public class RankedList {
         return HEADER + "\n" + toString();
     }
     
-    public RankedList fromTxtFormat(String fullContent) throws BadFileException {
-        String[] fullArray = fullContent.split("\n");
-        
-        if (!fullArray[0].equals(HEADER)) {
-            throw new BadFileException("Wrong file header.");
-        } else if (fullArray.length < 2) {
+    public static RankedList fromTxtFormat(List<String> fileContent) throws BadFileException {
+        if (!fileContent.get(0).equals(HEADER)) {
+            throw new BadFileException("Wrong file header. Should begin with: " + HEADER);
+        } else if (fileContent.size() < 2) {
             throw new BadFileException("File has no Rankees.");
         }
         
-        String[] noHeader = Arrays.copyOfRange(fullArray, 2, fullArray.length);
-        
+        List<String> noHeader = fileContent.subList(1, fileContent.size());
+
         List<Rankee> rankees = new ArrayList<>();
         for (String line : noHeader) {
             String[] parts = line.split(Rankee.DELIMITER);
@@ -155,8 +152,8 @@ public class RankedList {
             }
 
             try {
-                int rank = Integer.parseInt(parts[0]);
-                Rankee rankee = new Rankee(parts[1]);
+                int rank = Integer.parseInt(parts[0].trim());
+                Rankee rankee = new Rankee(parts[1].trim());
                 rankee.setRank(rank);
 
                 rankees.add(rankee);
@@ -179,12 +176,12 @@ public class RankedList {
             int rank = rankee.getRank();
             
             if (rank < prev) {
-                throw new BadFileException("Improper rank order in line: " + noHeader[i]);
+                throw new BadFileException("Improper rank order in line: " + noHeader.get(i));
             } else if (rank == prev) {
                 pointer.makeTie(rankee);
             } else {    // i.e. rank > prev
                 if (rank != i + 1) {
-                    throw new BadFileException("Incorrect rank in line: " + noHeader[i]);
+                    throw new BadFileException("Incorrect rank in line: " + noHeader.get(i));
                 }
                 
                 pointer.setBelow(rankee);
@@ -195,12 +192,17 @@ public class RankedList {
         
         return rankedList;
     }
-    
-    @Override
-    public String toString() {
+
+    public List<String> toStringList() {
         List<String> rankees = getRankees().stream()
                 .map(Rankee::toString)
                 .collect(Collectors.toList());
+        return rankees;
+    }
+
+    @Override
+    public String toString() {
+        List<String> rankees = toStringList();
         return String.join("\n", rankees);
     }
 }
