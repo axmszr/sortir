@@ -6,15 +6,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import sortir.exc.HowEvenException;
-import sortir.exc.RageQuitException;
-import sortir.io.Literate;
-
-public class Ranker {
+public class Ranker extends Runner {
     private final List<String> names;
     private Queue<RankedList> queue;
     
-    Ranker(List<String> names) {
+    public Ranker(List<String> names) {
         // assert non-empty?
         this.names = names;
         this.queue = makeQueue(names);
@@ -28,24 +24,14 @@ public class Ranker {
         Collections.shuffle(rankedLists);
         return new LinkedList<>(rankedLists);
     }
-    
-    public boolean isRanked() {
-        return (queue.size() <= 1);
+
+    @Override
+    Queue<RankedList> getQueue() {
+        return this.queue;
     }
-    
-    public RankedList rank(Literate rw) throws RageQuitException, HowEvenException {
-        while (!isRanked()) {
-            RankedList first = queue.poll();
-            RankedList second = queue.poll();
-            
-            RankedList merged = first.merge(second, rw);
-            queue.offer(merged);
-        }
-        
-        return queue.peek();
-    }
-    
-    public void reset() {
+
+    @Override
+    void reset() {
         this.queue = makeQueue(names);
     }
 }
