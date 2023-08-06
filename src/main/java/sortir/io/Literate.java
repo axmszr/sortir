@@ -132,11 +132,12 @@ public class Literate {
                 filePath += TXT;
             }
 
-            FileStuff file = new FileStuff(filePath + TXT);
+            FileStuff file = new FileStuff(filePath);
 
             try {
                 file.saveFile(fileContent);
                 Writer.saySuccess();
+                return;
             } catch (BadFileException e) {
                 // continue
             }

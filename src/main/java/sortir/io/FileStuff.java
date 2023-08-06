@@ -23,7 +23,10 @@ public class FileStuff {
         }
 
         try {
-            this.file.getParentFile().mkdir();
+            if (this.file.getParentFile() != null) {
+                this.file.getParentFile().mkdir();
+            }
+
             this.file.createNewFile();
 
             FileWriter fw = new FileWriter(this.file);
