@@ -7,13 +7,13 @@ public class Rankee {
     protected static final String DELIMITER = "#;";
     
     private final String name;
-    private List<Rankee> ties;
+    private final List<Rankee> ties;
     private Rankee below;
     private int rank;
     
     Rankee(String name) {
         this.name = name;
-        this.ties = new ArrayList<Rankee>();
+        this.ties = new ArrayList<>();
         this.ties.add(this);
         this.below = this;
         this.rank = 0;
@@ -80,7 +80,7 @@ public class Rankee {
     
     @Override
     public String toString() {
-        return String.format("%d%s%s",
+        return String.format("%d %s %s",
                 this.rank, DELIMITER, this.name);
     }
 }
