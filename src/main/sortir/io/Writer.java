@@ -16,6 +16,7 @@ public class Writer {
     private static final String TIE = "[3] ~-TIE-~";
     private static final String FILE_EMPTY = "That file is empty :/";
     private static final String BYE = "Bye!";
+    private static final String RANKER_INPUT_HEADER = "Great! Now list them out!";
     private static final String MERGER_INPUT_HEADER = "Ranked List Format:";
     
     private static final List<String> ACTION_QUERY_HEADERS = List.of(
@@ -250,5 +251,9 @@ public class Writer {
 
     public static void sayMergerInputFormat() {
         sayHappy(MERGER_INPUT_HEADER, MERGER_INPUT_BODY);
+    }
+
+    public static void sayRankerInputFormat() {
+        sayHappy(RANKER_INPUT_HEADER, noBody);
     }
 }

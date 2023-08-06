@@ -65,6 +65,9 @@ public class Literate {
         List<String> inputs = new ArrayList<>();
 
         int count = getInt();
+
+        Writer.sayRankerInputFormat();
+
         for (int i = 0; i < count; i++) {
             String input = get();
             inputs.add(input);
