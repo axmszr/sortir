@@ -26,8 +26,8 @@ public class Rankee {
     protected Rankee makeCopyWithTies() {
         Rankee copy = makeCopy();
         
-        for (Rankee tie : getTies()) {
-            Rankee newTie = tie.makeCopy();
+        for (int i = 1; i < getTies().size(); i++) {
+            Rankee newTie = getTies().get(i).makeCopy();
             copy.makeTie(newTie);
         }
         
