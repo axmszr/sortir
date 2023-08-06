@@ -1,62 +1,147 @@
 package sortir;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import sortir.exc.BadFileException;
 import sortir.exc.HowEvenException;
 import sortir.exc.RageQuitException;
 import sortir.io.Literate;
 import sortir.io.Writer;
 import sortir.rank.Merger;
+import sortir.rank.RankedList;
 import sortir.rank.Ranker;
+import sortir.rank.Runner;
 
 class Sortir {
 
-    public static void main(String[] args) throws InterruptedException, HowEvenException {
+    public static void main(String[] args) throws InterruptedException {
         Literate rw = new Literate();
 
         try {
-            int choice = rw.getActionChoice();
-            switch (choice) {
-            case 1:     // rank
-                Ranker ranker = makeRanker(rw);
-                // read in 1 list, mentioning errors along the way
-                break;
-            case 2:     // merge
-                Merger merger = makeMerger(rw);
-                // ask for number of lists
-                // read in that many lists
-                break;
-            default:    // panik
-                throw new HowEvenException();
+            while (true) {
+                Runner runner = makeRunner(rw);
+                RankedList rankedList = run(runner, rw);
+                doSaveRequest(rankedList, rw);
+
+                boolean doRestart = rw.getRestartChoice();
+
+                if (!doRestart) {
+                    break;
+                }
             }
+        } catch (HowEvenException e) {
+            howEven();
         } catch (RageQuitException e) {
             rageQuit();
         }
 
-
+        rw.bye();
     }
 
-    private static Ranker makeRanker(Literate rw) {
-        // ask for input type
-        // if manual, how many inputs
-        // if file, read in
+    private static Runner makeRunner(Literate rw) throws HowEvenException, RageQuitException {
+        int action = rw.getActionChoice();
+        switch (action) {
+        case 1:     // rank
+            return makeRanker(rw);
+        case 2:     // merge
+            return makeMerger(rw);
+        default:    // panik
+            throw new HowEvenException();
+        }
     }
 
-    private static Merger makeMerger(Literate rw) {
-        // ask for how many lists
-        // for each, ask for input type
-        // if manual input, convert to proper form (add #ranked)
+    private static Ranker makeRanker(Literate rw) throws HowEvenException, RageQuitException {
+        List<String> names;
+
+        while (true) {
+            int choice = rw.getInputChoice();
+            switch (choice) {
+            case 1:     // manual
+                names = rw.manualRankerInput();
+                break;
+            case 2:     // readInList
+                names = rw.readFromFile();
+                break;
+            default:
+                throw new HowEvenException();
+            }
+
+            if (rw.confirm(names)) {
+                return new Ranker(names);
+            }
+        }
     }
 
-    private static List<String> manualInput() {
-        // ask for how many inputs
-        // provide format
+    private static Merger makeMerger(Literate rw) throws RageQuitException, HowEvenException {
+        List<RankedList> rankedLists = new ArrayList<>();
 
+        int count = rw.getInt();
+        for (int i = 0; i < count; i++) {
+            rankedLists.add(makeRankedList(rw));
+        }
+
+        return new Merger(rankedLists);
     }
 
-    private static List<String> readFile() {
-        // ask for file name, must be in same directory
+    private static RankedList makeRankedList(Literate rw) throws RageQuitException, HowEvenException {
+        List<String> formattedNames;
+        RankedList rankedList;
 
+        while (true) {
+            int choice = rw.getInputChoice();
+            switch (choice) {
+            case 1:     // manual
+                formattedNames = rw.manualMergerInput();
+                formattedNames.add(0, RankedList.HEADER);
+                break;
+            case 2:     // readInList
+                formattedNames = rw.readFromFile();
+                break;
+            default:
+                throw new HowEvenException();
+            }
+
+            try {
+                rankedList = RankedList.fromTxtFormat(formattedNames);
+            } catch (BadFileException e) {
+                rw.sayFailedMerger(e.getMessage());
+                continue;
+            }
+
+            if (rw.confirm(formattedNames)) {
+                return rankedList;
+            }
+        }
+    }
+
+    private static RankedList run(Runner runner, Literate rw) throws HowEvenException, RageQuitException {
+        RankedList attempt;
+
+        while (true) {
+            attempt = runner.run(rw);
+
+            if (rw.confirm(attempt.toStringList())) {
+                return attempt;
+            }
+        }
+    }
+
+    private static void doSaveRequest(RankedList rankedList, Literate rw) throws RageQuitException {
+        boolean doSave = rw.getSaveChoice();
+
+        if (!doSave) {
+            return;
+        }
+
+        String fileContent = rankedList.toTxtFormat();
+        rw.saveToFile(fileContent);
+    }
+
+    private static void howEven() throws InterruptedException {
+        Writer.sayHowEven();
+        Thread.sleep(2000);
+        System.exit(0);
     }
 
     private static void rageQuit() throws InterruptedException {
